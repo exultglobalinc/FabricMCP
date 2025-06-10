@@ -1,1 +1,1 @@
-# FrabicAnalayticsMCP
+# FabricAnalayticsMCP
