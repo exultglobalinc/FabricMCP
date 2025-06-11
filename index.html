@@ -1,989 +1,1593 @@
-<!DOCTYPE html>
- 
-<html lang="en">
- 
-<head>
- 
-    <meta charset="UTF-8">
- 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
- 
-    <title>Chatbot</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
-    <style>
- 
-        * {
- 
-            margin: 0;
- 
-            padding: 0;
- 
-            box-sizing: border-box;
- 
-        }
- 
- 
- 
-        body {
- 
-            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
- 
-            background: #f2f2f4;
- 
-            height: 100vh;
- 
-            display: flex;
- 
-            flex-direction: column;
- 
-        }
- 
- 
- 
-        .header {
- 
-            padding: 16px 24px;
- 
-            background: #000000;
- 
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
- 
-            display: flex;
- 
-            align-items: center;
- 
-            justify-content: space-between;
- 
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
- 
-        }
- 
- 
- 
-        .header-left {
- 
-            display: flex;
- 
-            align-items: center;
- 
-            gap: 20px;
- 
-        }
- 
- 
- 
-        .logo-group {
- 
-            display: flex;
- 
-            align-items: center;
- 
-            gap: 12px;
- 
-        }
- 
- 
- 
-        .logo-image-box { /* Container for the image with badge styling */
- 
-            display: flex;
- 
-            align-items: center;
- 
-            justify-content: center;
- 
-            background: none; /* Badge background */
- 
-            color: #FFFFFF; /* Badge text color (though no text in this box) */
- 
-            border: none; /* Badge border */
- 
-            padding: 6px 12px; /* Badge padding */
- 
-            border-radius: 12px; /* Badge border-radius */
- 
-        }
- 
- 
- 
-        .logo-group img { /* Style for the image within logo-group */
- 
-            height: 40px; /* Maintain consistent height */
- 
-            width: auto;
- 
-        }
- 
- 
- 
-        .header h1 {
- 
-            font-size: 24px;
- 
-            font-weight: 600;
- 
-            color: #FFFFFF; /* Changed text color to white */
- 
-        }
- 
- 
- 
-        .header p {
- 
-            color: #FFFFFF; /* Changed text color to white */
- 
-            font-size: 14px;
- 
-        }
- 
- 
- 
-        .header-controls {
- 
-            display: flex;
- 
-            align-items: center;
- 
-            gap: 16px;
- 
-        }
- 
- 
- 
-        .clear-btn {
-            background-color: #444; /* Dark grey */
-            color: #FFFFFF; /* White text */
-            border: none;
-            padding: 8px 16px;
-            border-radius: 9999px; /* Make it pill-shaped to fit visually */
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-        }
- 
-        .clear-btn:hover {
-            background-color: #555; /* Slightly lighter grey on hover */
-        }
- 
-        .row-limit-control {
- 
-            display: flex;
- 
-            align-items: center;
- 
-            gap: 8px;
- 
-            font-size: 14px;
- 
-            color: white;
- 
-        }
- 
- 
- 
-        .row-limit-control input {
- 
-            width: 60px;
- 
-            padding: 4px 8px;
- 
-            border: 1px solid rgba(255, 255, 255, 0.3);
- 
-            border-radius: 4px;
- 
-            font-size: 13px;
- 
-            text-align: center;
- 
-            background: rgba(255, 255, 255, 0.15);
- 
-            color: white;
- 
-        }
- 
- 
- 
-        .row-limit-control input::placeholder {
- 
-            color: rgba(255, 255, 255, 0.7);
- 
-        }
- 
- 
- 
-        .status-badge {
- 
-            font-size: 12px;
- 
-            font-weight: 500;
- 
-            display: flex;
- 
-            align-items: center;
- 
-            gap: 6px;
- 
-        }
- 
- 
- 
-        .status-badge.connecting {
- 
-            color: #1a5f56;
- 
-        }
- 
- 
- 
-        .status-badge.connected {
- 
-            color: #FFFFFF; /* Changed text color to white */
- 
-        }
- 
- 
- 
-        .status-badge.offline {
- 
-            color: white;
- 
-        }
- 
- 
- 
-        .status-indicator {
- 
-            width: 8px;
- 
-            height: 8px;
- 
-            border-radius: 50%;
- 
-            background: #ef4444; /* Default offline color */
- 
-        }
- 
- 
- 
-        .status-indicator.online {
- 
-            background: #00FF00; /* Bright green color */
- 
-        }
- 
- 
- 
-        .chat-container {
- 
-            flex: 1;
- 
-            display: flex;
- 
-            flex-direction: column;
- 
-            padding: 20px 24px;
- 
-            max-width: 1200px;
- 
-            margin: 0 auto;
- 
-            width: 100%;
- 
-        }
- 
- 
- 
-        .chat-content {
- 
-            flex: 1;
- 
-            background: white;
- 
-            border-radius: 12px;
- 
-            border: 1px solid #e5e7eb;
- 
-            display: flex;
- 
-            flex-direction: column;
- 
-            margin-bottom: 16px;
- 
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
- 
-        }
- 
- 
- 
-        .messages {
- 
-            flex: 1;
- 
-            overflow-y: auto;
- 
-            padding: 20px;
- 
-            display: flex;
- 
-            flex-direction: column;
- 
-            gap: 16px;
- 
-        }
- 
- 
- 
-        .message {
- 
-            max-width: 80%;
- 
-            padding: 12px 16px;
- 
-            border-radius: 12px;
- 
-            font-size: 14px;
- 
-            line-height: 1.5;
- 
-        }
- 
- 
- 
-        .message.user {
- 
-            background: #809ebd;
-            color: #ffffff;
-            align-self: flex-end;
-            margin-left: auto;
-            font-weight: 500;
-        }
- 
- 
- 
-        .message.assistant {
- 
-            background: #f3f4f6;
- 
-            color: #374151;
- 
-            align-self: flex-start;
- 
-            border: 1px solid #e5e7eb;
- 
-            white-space: pre-wrap;
- 
-        }
- 
- 
- 
-        .message.system {
- 
-            background: #FFFFFF;
-            color: #4682B4;
-            align-self: center;
-            border: none;
-            max-width: 90%;
-            text-align: center;
-            font-style: italic;
-        }
- 
- 
- 
-        .input-area {
- 
-            padding: 16px 20px;
- 
-            background: white;
- 
-            border-top: 1px solid #e5e7eb;
- 
-            border-radius: 0 0 12px 12px;
- 
-            display: flex;
- 
-            gap: 12px;
- 
-            align-items: flex-end;
- 
-        }
- 
- 
- 
-        .input-container {
- 
-            flex: 1;
- 
-        }
- 
- 
- 
-        #messageInput {
-            width: 100%;
-            padding: 12px 16px;
-            border: 1px solid #94B6E9; /* Light blue border */
-            border-radius: 8px;
-            font-size: 14px;
-            resize: none;
-            outline: none;
-            font-family: inherit;
-            max-height: 120px;
-        }
- 
-        #messageInput:focus {
-            border-color: #000000; /* Black border on focus */
-            box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.2); /* Black box shadow on focus */
-        }
- 
-        #sendBtn {
-            background: #000000; /* Changed background to black */
-            color: #FFFFFF; /* Changed text color to white */
-            border: none;
-            padding: 12px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-        }
- 
-        #sendBtn:hover:not(:disabled) {
-            background: #333333; /* Darker grey on hover */
-        }
- 
-        #sendBtn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
- 
- 
- 
-        .typing-indicator {
-            display: none; /* Hidden by default */
-            padding: 12px 20px;
-            background: #f3f4f6;
-            border-radius: 12px;
-            margin: 8px 0;
-            align-self: flex-start;
-            border: 1px solid #e5e7eb;
-        }
- 
-        .thinking-text {
-            font-weight: 500;
-            color: #4b5563;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-style: italic; /* Make text italic */
-        }
- 
-        .thinking-text::before {
-            content: '';
-            width: 12px;
-            height: 12px;
-            border: 2px solid #4b5563;
-            border-radius: 50%;
-            border-top-color: transparent;
-            animation: spin 1s linear infinite;
-        }
- 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
- 
-    </style>
- 
-</head>
- 
-<body>
- 
-    <div class="header">
- 
-        <div class="header-left">
- 
-            <div>
- 
-                <div class="logo-group">
-                    <div class="logo-image-box">
-                        <img src="./exult_logo.png" alt="ExULT Logo" onerror="this.style.display='none'">
-                    </div>
-                    <h1>| Smart Assistant</h1>
-                </div>
- 
-                <p>Ask questions about your data and get instant insights</p>
- 
-            </div>
- 
-        </div>
- 
-         
- 
-        <div class="header-controls">
- 
-            <button class="clear-btn" id="clearBtn">Clear Chat</button>
-            <div class="status-badge offline" id="connectionBadge">
- 
-                <div class="status-indicator" id="statusIndicator"></div>
- 
-                <span id="statusText">OFFLINE</span>
- 
-            </div>
- 
-        </div>
- 
-    </div>
- 
- 
- 
-    <div class="chat-container">
- 
-        <div class="chat-content">
- 
-            <div class="messages" id="messages">
-            </div>
- 
- 
-            <div class="typing-indicator" id="typingIndicator">
-                <span class="thinking-text">Thinking...</span>
-            </div>
- 
- 
- 
-            <div class="input-area">
- 
-                <div class="input-container">
- 
-                    <textarea
- 
-                        id="messageInput"
- 
-                        placeholder="Ask a question about your data..."
- 
-                        rows="1"
- 
-                    ></textarea>
- 
-                </div>
- 
-                <button id="sendBtn">Send ➤</button>
- 
-            </div>
- 
-        </div>
- 
-    </div>
- 
- 
- 
-    <script>
- 
-        class DataChatbot {
- 
-            constructor() {
- 
-                this.init();
- 
-            }
- 
-           
- 
-            init() {
- 
-                this.elements = {
- 
-                    messages: document.getElementById('messages'),
- 
-                    messageInput: document.getElementById('messageInput'),
- 
-                    sendBtn: document.getElementById('sendBtn'),
- 
-                    typingIndicator: document.getElementById('typingIndicator'),
- 
-                    statusIndicator: document.getElementById('statusIndicator'),
- 
-                    statusText: document.getElementById('statusText'),
- 
-                    connectionBadge: document.getElementById('connectionBadge'),
- 
-                    clearBtn: document.getElementById('clearBtn')
- 
-                };
- 
-               
- 
-                this.state = {
- 
-                    isConnected: false,
- 
-                    serverUrl: 'https://smartassistantmcp1.onrender.com',
-                    endpoints: {
-                        health: '/api/fabric/health',
-                        analyze: '/api/fabric/intelligent-analyze',
-                        query: '/api/fabric/query',
-                        visualize: '/api/fabric/visualize',
-                        clear_cache: '/api/fabric/clear-cache'
-                    }
-                };
- 
-               
+<!DOCTYPE html> 
 
-               
+<html lang="en"> 
+
+<head> 
+
+    <meta charset="UTF-8"> 
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+
+    <title>Smart Assistant</title> 
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script> 
+
+    <style> 
+
+        * { 
+
+            margin: 0; 
+
+            padding: 0; 
+
+            box-sizing: border-box; 
+
+        } 
+
+ 
+
+        body { 
+
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif; 
+
+            background: #f2f2f4; 
+
+            height: 100vh; 
+
+            display: flex; 
+
+            flex-direction: column; 
+
+        } 
+
+ 
+
+        .header { 
+
+            padding: 16px 24px; 
+
+            background: #000000; 
+
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2); 
+
+            display: flex; 
+
+            align-items: center; 
+
+            justify-content: space-between; 
+
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); 
+
+        } 
+
+ 
+
+        .header-left { 
+
+            display: flex; 
+
+            align-items: center; 
+
+            gap: 20px; 
+
+        } 
+
+ 
+
+        .logo-group { 
+
+            display: flex; 
+
+            align-items: center; 
+
+            gap: 12px; 
+
+        } 
+
+ 
+
+        .logo-image-box { 
+
+            display: flex; 
+
+            align-items: center; 
+
+            justify-content: center; 
+
+            background: none; 
+
+            color: #FFFFFF; 
+
+            border: none; 
+
+            padding: 6px 12px; 
+
+            border-radius: 12px; 
+
+        } 
+
+ 
+
+        .logo-group img { 
+
+            height: 40px; 
+
+            width: auto; 
+
+        } 
+
+ 
+
+        .header h1 { 
+
+            font-size: 24px; 
+
+            font-weight: 600; 
+
+            color: #FFFFFF; 
+
+        } 
+
+ 
+
+        .header p { 
+
+            color: #FFFFFF; 
+
+            font-size: 14px; 
+
+        } 
+
+ 
+
+        .header-controls { 
+
+            display: flex; 
+
+            align-items: center; 
+
+            gap: 16px; 
+
+        } 
+
+ 
+
+        .session-controls { 
+
+            display: flex; 
+
+            align-items: center; 
+
+            gap: 8px; 
+
+        } 
+
+ 
+
+        .session-selector { 
+
+            background-color: #333; 
+
+            color: #FFFFFF; 
+
+            border: 1px solid #555; 
+
+            padding: 6px 12px; 
+
+            border-radius: 6px; 
+
+            font-size: 12px; 
+
+            cursor: pointer; 
+
+            min-width: 280px; 
+
+            max-width: 400px; 
+
+        } 
+
+ 
+
+        .session-selector:hover { 
+
+            background-color: #444; 
+
+        } 
+
+ 
+
+        .session-btn { 
+
+            background-color: #444; 
+
+            color: #FFFFFF; 
+
+            border: none; 
+
+            padding: 6px 12px; 
+
+            border-radius: 6px; 
+
+            cursor: pointer; 
+
+            font-size: 12px; 
+
+            font-weight: 500; 
+
+        } 
+
+ 
+
+        .session-btn:hover { 
+
+            background-color: #555; 
+
+        } 
+
+ 
+
+        .session-btn.new-chat { 
+
+            background-color: #6c757d; 
+
+            padding: 6px 16px; 
+
+            font-weight: 600; 
+
+        } 
+
+ 
+
+        .session-btn.new-chat:hover { 
+
+            background-color: #5a6268; 
+
+        } 
+
+ 
+
+        .status-badge { 
+
+            font-size: 12px; 
+
+            font-weight: 500; 
+
+            display: flex; 
+
+            align-items: center; 
+
+            gap: 6px; 
+
+        } 
+
+ 
+
+        .status-badge.connecting { 
+
+            color: #1a5f56; 
+
+        } 
+
+ 
+
+        .status-badge.connected { 
+
+            color: #FFFFFF; 
+
+        } 
+
+ 
+
+        .status-badge.offline { 
+
+            color: white; 
+
+        } 
+
+ 
+
+        .status-indicator { 
+
+            width: 8px; 
+
+            height: 8px; 
+
+            border-radius: 50%; 
+
+            background: #ef4444; 
+
+        } 
+
+ 
+
+        .status-indicator.online { 
+
+            background: #00FF00; 
+
+        } 
+
+ 
+
+        .status-indicator.offline { 
+
+            background: #FF0000; 
+
+        } 
+
+ 
+
+        .status-indicator.connecting { 
+
+            background: #006400; 
+
+        } 
+
+ 
+
+        .chat-container { 
+
+            flex: 1; 
+
+            display: flex; 
+
+            flex-direction: column; 
+
+            padding: 20px 24px; 
+
+            max-width: 1200px; 
+
+            margin: 0 auto; 
+
+            width: 100%; 
+
+        } 
+
+ 
+
+        .chat-content { 
+
+            flex: 1; 
+
+            background: white; 
+
+            border-radius: 12px; 
+
+            border: 1px solid #e5e7eb; 
+
+            display: flex; 
+
+            flex-direction: column; 
+
+            margin-bottom: 16px; 
+
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); 
+
+        } 
+
+ 
+
+        .messages { 
+
+            flex: 1; 
+
+            overflow-y: auto; 
+
+            padding: 20px; 
+
+            display: flex; 
+
+            flex-direction: column; 
+
+            gap: 16px; 
+
+        } 
+
+ 
+
+        .message { 
+
+            max-width: 80%; 
+
+            padding: 12px 16px; 
+
+            border-radius: 12px; 
+
+            font-size: 14px; 
+
+            line-height: 1.5; 
+
+        } 
+
+ 
+
+        .message.user { 
+
+            background: #809ebd; 
+
+            color: #ffffff; 
+
+            align-self: flex-end; 
+
+            margin-left: auto; 
+
+            font-weight: 500; 
+
+        } 
+
+ 
+
+        .message.assistant { 
+
+            background: #f3f4f6; 
+
+            color: #374151; 
+
+            align-self: flex-start; 
+
+            border: 1px solid #e5e7eb; 
+
+            white-space: pre-wrap; 
+
+        } 
+
+ 
+
+        .message.system { 
+
+            background: #FFFFFF; 
+
+            color: #4682B4; 
+
+            align-self: center; 
+
+            border: none; 
+
+            max-width: 90%; 
+
+            text-align: center; 
+
+            font-style: italic; 
+
+        } 
+
+ 
+
+        .graph-container { 
+
+            height: 400px; 
+
+            margin: 10px 0; 
+
+            background: #fafafa; 
+
+            border-radius: 8px; 
+
+            padding: 10px; 
+
+        } 
+
+ 
+
+        .input-area { 
+
+            padding: 16px 20px; 
+
+            background: white; 
+
+            border-top: 1px solid #e5e7eb; 
+
+            border-radius: 0 0 12px 12px; 
+
+            display: flex; 
+
+            gap: 12px; 
+
+            align-items: flex-end; 
+
+        } 
+
+ 
+
+        .input-container { 
+
+            flex: 1; 
+
+        } 
+
+ 
+
+        #messageInput { 
+
+            width: 100%; 
+
+            padding: 12px 16px; 
+
+            border: 1px solid #94B6E9; 
+
+            border-radius: 8px; 
+
+            font-size: 14px; 
+
+            resize: none; 
+
+            outline: none; 
+
+            font-family: inherit; 
+
+            max-height: 120px; 
+
+        } 
+
+ 
+
+        #messageInput:focus { 
+
+            border-color: #000000; 
+
+            box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.2); 
+
+        } 
+
+ 
+
+        #sendBtn { 
+
+            background: #000000; 
+
+            color: #FFFFFF; 
+
+            border: none; 
+
+            padding: 12px 20px; 
+
+            border-radius: 8px; 
+
+            cursor: pointer; 
+
+            font-size: 14px; 
+
+            font-weight: 600; 
+
+        } 
+
+ 
+
+        #sendBtn:hover:not(:disabled) { 
+
+            background: #333333; 
+
+        } 
+
+ 
+
+        #sendBtn:disabled { 
+
+            opacity: 0.5; 
+
+            cursor: not-allowed; 
+
+        } 
+
+ 
+
+        .typing-indicator { 
+
+            display: none; 
+
+            padding: 12px 20px; 
+
+            background: #f3f4f6; 
+
+            border-radius: 12px; 
+
+            margin: 8px 0; 
+
+            align-self: flex-start; 
+
+            border: 1px solid #e5e7eb; 
+
+        } 
+
+ 
+
+        .thinking-text { 
+
+            font-weight: 500; 
+
+            color: #4b5563; 
+
+            display: flex; 
+
+            align-items: center; 
+
+            gap: 8px; 
+
+            font-style: italic; 
+
+        } 
+
+ 
+
+        .thinking-text::before { 
+
+            content: ''; 
+
+            width: 12px; 
+
+            height: 12px; 
+
+            border: 2px solid #4b5563; 
+
+            border-radius: 50%; 
+
+            border-top-color: transparent; 
+
+            animation: spin 1s linear infinite; 
+
+        } 
+
+ 
+
+        @keyframes spin { 
+
+            to { transform: rotate(360deg); } 
+
+        } 
+
+    </style> 
+
+</head> 
+
+<body> 
+
+    <div class="header"> 
+
+        <div class="header-left"> 
+
+            <div> 
+
+                <div class="logo-group"> 
+
+                    <div class="logo-image-box"> 
+
+                        <img src="./exult_logo.png" alt="ExULT Logo" onerror="this.style.display='none'"> 
+
+                    </div> 
+
+                    <h1>| Smart Assistant</h1> 
+
+                </div> 
+
+                <p>Ask questions about your data and get instant insights</p> 
+
+            </div> 
+
+        </div> 
+
+         
+
+        <div class="header-controls"> 
+
+            <div class="session-controls"> 
+
+                <select class="session-selector" id="sessionSelector"> 
+
+                    <option value="">Loading sessions...</option> 
+
+                </select> 
+
+                <button class="session-btn new-chat" id="newChatBtn">New Chat</button> 
+
+            </div> 
+
+            <div class="status-badge offline" id="connectionBadge"> 
+
+                <div class="status-indicator" id="statusIndicator"></div> 
+
+                <span id="statusText">OFFLINE</span> 
+
+            </div> 
+
+        </div> 
+
+    </div> 
+
+ 
+
+    <div class="chat-container"> 
+
+        <div class="chat-content"> 
+
+            <div class="messages" id="messages"></div> 
+
+             
+
+            <div class="typing-indicator" id="typingIndicator"> 
+
+                <span class="thinking-text">Thinking...</span> 
+
+            </div> 
+
+ 
+
+            <div class="input-area"> 
+
+                <div class="input-container"> 
+
+                    <textarea 
+
+                        id="messageInput" 
+
+                        placeholder="Ask a question about your data..." 
+
+                        rows="1" 
+
+                    ></textarea> 
+
+                </div> 
+
+                <button id="sendBtn">Send ➤</button> 
+
+            </div> 
+
+        </div> 
+
+    </div> 
+
+ 
+
+    <script> 
+
+        class DataChatbot { 
+
+            constructor() { 
+
+                this.init(); 
+
+            } 
+
+ 
+
+            init() { 
+
+                this.elements = { 
+
+                    messages: document.getElementById('messages'), 
+
+                    messageInput: document.getElementById('messageInput'), 
+
+                    sendBtn: document.getElementById('sendBtn'), 
+
+                    typingIndicator: document.getElementById('typingIndicator'), 
+
+                    statusIndicator: document.getElementById('statusIndicator'), 
+
+                    statusText: document.getElementById('statusText'), 
+
+                    connectionBadge: document.getElementById('connectionBadge'), 
+
+                    sessionSelector: document.getElementById('sessionSelector'), 
+
+                    newChatBtn: document.getElementById('newChatBtn') 
+
+                }; 
+
+ 
+
+                this.state = { 
+
+                    isConnected: false, 
+
+                    serverUrl: 'https://fabricanalayticsmcp-2-uuz9.onrender.com', 
+
+                    sessionId: this.generateDefaultSessionId(), 
+
+                    availableSessions: [], 
+
+                    chatHistory: [], 
+
+                    messageCount: 0, 
+
+                    endpoints: { 
+
+                        health: '/health', 
+
+                        analyze: '/api/fabric/intelligent', 
+
+                        chatSession: '/api/chat/session', 
+
+                        chatMessages: '/api/chat/messages', 
+
+                        chatSessions: '/api/chat/sessions', 
+
+                        clearChat: '/api/chat/clear' 
+
+                    } 
+
+                }; 
+
+ 
+
+                this.setupEventListeners(); 
+
+                this.initializeChat(); 
+
+            } 
+
+ 
+
+            generateDefaultSessionId() { 
+
+                const now = new Date(); 
+
+                const dateString = `${now.getFullYear()}${(now.getMonth()+1).toString().padStart(2,'0')}${now.getDate().toString().padStart(2,'0')}`; 
+
+                return `powerbi_${dateString}_default`; 
+
+            } 
+
+ 
+
+            setupEventListeners() { 
+
+                this.elements.sendBtn.onclick = () => this.sendMessage(); 
+
+                this.elements.sessionSelector.onchange = () => this.switchSession(); 
+
+                this.elements.newChatBtn.onclick = () => this.createNewChat(); 
+
+ 
+
+                this.elements.messageInput.onkeypress = (e) => { 
+
+                    if (e.key === 'Enter' && !e.shiftKey) { 
+
+                        e.preventDefault(); 
+
+                        this.sendMessage(); 
+
+                    } 
+
+                }; 
+
+ 
+
+                this.elements.messageInput.oninput = () => this.autoResizeTextarea(); 
+
+            } 
+
+ 
+
+            autoResizeTextarea() { 
+
+                const input = this.elements.messageInput; 
+
+                input.style.height = 'auto'; 
+
+                input.style.height = Math.min(input.scrollHeight, 120) + 'px'; 
+
+            } 
+
+ 
+
+            async initializeChat() { 
+
+                this.updateConnectionStatus('connecting'); 
+
+                 
+
+                try { 
+
+                    const healthResponse = await fetch(`${this.state.serverUrl}${this.state.endpoints.health}`, { 
+
+                        method: 'GET', 
+
+                        headers: { 'Accept': 'application/json' } 
+
+                    }); 
+
+                     
+
+                    if (!healthResponse.ok) { 
+
+                        throw new Error(`Health check failed: ${healthResponse.status}`); 
+
+                    } 
+
+                     
+
+                    this.state.isConnected = true; 
+
+                    this.updateConnectionStatus('connected'); 
+
+                     
+
+                    this.addMessage(`✅ Connected to Smart Assistant!`, 'system'); 
+
+                     
+
+                    // Load available sessions and current session messages 
+
+                    await Promise.all([ 
+
+                        this.loadAvailableSessions(), 
+
+                        this.loadChatHistoryFromServer() 
+
+                    ]); 
+
+                     
+
+                } catch (error) { 
+
+                    this.state.isConnected = false; 
+
+                    this.updateConnectionStatus('offline'); 
+
+                    this.addMessage(`❌ Connection failed: ${error.message}`, 'system'); 
+
+                } 
+
+            } 
+
+ 
+
+            async loadAvailableSessions() { 
+
+                try { 
+
+                    console.log('📋 Loading available sessions...'); 
+
+                    // Load ALL sessions, not just today's 
+
+                    const response = await fetch(`${this.state.serverUrl}${this.state.endpoints.chatSessions}?date=all&limit=100`, { 
+
+                        method: 'GET', 
+
+                        headers: { 'Accept': 'application/json' } 
+
+                    }); 
+
+                     
+
+                    if (response.ok) { 
+
+                        const data = await response.json(); 
+
+                        console.log('📋 Server response:', data); 
+
+                        this.state.availableSessions = data.sessions || []; 
+
+                        this.updateSessionSelector(); 
+
+                        console.log(`📋 Loaded ${data.sessions.length} available sessions across all dates`); 
+
+                    } else { 
+
+                        console.error('❌ Failed to load sessions:', response.status); 
+
+                    } 
+
+                } catch (error) { 
+
+                    console.error('❌ Failed to load sessions:', error); 
+
+                } 
+
+            } 
+
+ 
+
+            updateSessionSelector() { 
+
+                const selector = this.elements.sessionSelector; 
+
+                selector.innerHTML = ''; 
+
+                 
+
+                console.log('🔄 Updating session selector with', this.state.availableSessions.length, 'sessions'); 
+
+                 
+
+                if (this.state.availableSessions.length === 0) { 
+
+                    const option = document.createElement('option'); 
+
+                    option.value = this.state.sessionId; 
+
+                    option.textContent = 'Current Chat (New)'; 
+
+                    selector.appendChild(option); 
+
+                } else { 
+
+                    // Group sessions by date 
+
+                    const sessionsByDate = {}; 
+
+                    this.state.availableSessions.forEach(session => { 
+
+                        const date = session.session_date || 'Unknown Date'; 
+
+                        if (!sessionsByDate[date]) { 
+
+                            sessionsByDate[date] = []; 
+
+                        } 
+
+                        sessionsByDate[date].push(session); 
+
+                    }); 
+
+                     
+
+                    console.log('📅 Sessions grouped by date:', sessionsByDate); 
+
+                     
+
+                    // Create grouped options 
+
+                    Object.keys(sessionsByDate).forEach(date => { 
+
+                        // Add date group header 
+
+                        const dateGroup = document.createElement('optgroup'); 
+
+                        dateGroup.label = date; 
+
+                         
+
+                        sessionsByDate[date].forEach((session) => { 
+
+                            const option = document.createElement('option'); 
+
+                            option.value = session.session_id; 
+
+                             
+
+                            // Create dynamic display name 
+
+                            const messageText = session.message_count === 1 ? 'msg' : 'msgs'; 
+
+                            const timeStamp = new Date(session.last_message).toLocaleTimeString('en-US', {  
+
+                                hour: '2-digit',  
+
+                                minute: '2-digit', 
+
+                                hour12: false 
+
+                            }); 
+
+                             
+
+                            // Use display_name (last question) for better identification 
+
+                            const displayName = session.display_name || session.first_question || 'Unknown'; 
+
+                            option.textContent = `${timeStamp} - ${displayName} (${session.message_count} ${messageText})`; 
+
+                             
+
+                            if (session.session_id === this.state.sessionId) { 
+
+                                option.selected = true; 
+
+                            } 
+
+                             
+
+                            dateGroup.appendChild(option); 
+
+                        }); 
+
+                         
+
+                        selector.appendChild(dateGroup); 
+
+                    }); 
+
+                } 
+
+            } 
+
+ 
+
+            async switchSession() { 
+
+                const newSessionId = this.elements.sessionSelector.value; 
+
+                if (newSessionId && newSessionId !== this.state.sessionId) { 
+
+                    this.state.sessionId = newSessionId; 
+
+                     
+
+                    // Clear current messages and load new session 
+
+                    this.elements.messages.innerHTML = ''; 
+
+                    this.addMessage(`🔄 Switched to chat: ${newSessionId.split('_').pop()}`, 'system'); 
+
+                     
+
+                    await this.loadChatHistoryFromServer(); 
+
+                } 
+
+            } 
+
+ 
+
+            async createNewChat() { 
+
+                try { 
+
+                    const response = await fetch(`${this.state.serverUrl}${this.state.endpoints.clearChat}?session=${encodeURIComponent(this.state.sessionId)}&create_new=true`, { 
+
+                        method: 'POST', 
+
+                        headers: { 'Accept': 'application/json' } 
+
+                    }); 
+
+                     
+
+                    if (response.ok) { 
+
+                        const data = await response.json(); 
+
+                        this.state.sessionId = data.new_session_id; 
+
+                         
+
+                        // Clear UI and update 
+
+                        this.elements.messages.innerHTML = ''; 
+
+                        this.addMessage(`💬 New chat started!`, 'system'); 
+
+                        this.addMessage('Ask me anything about your data...', 'system'); 
+
+                         
+
+                        await this.loadAvailableSessions(); // Refresh session list 
+
+                         
+
+                        console.log(`💬 Created new chat: ${this.state.sessionId}`); 
+
+                    } 
+
+                } catch (error) { 
+
+                    console.error('Failed to create new chat:', error); 
+
+                    this.addMessage('❌ Failed to create new chat', 'system'); 
+
+                } 
+
+            } 
+
+ 
+
+            async loadChatHistoryFromServer() { 
+
+                try { 
+
+                    const response = await fetch(`${this.state.serverUrl}${this.state.endpoints.chatMessages}?session=${encodeURIComponent(this.state.sessionId)}&limit=20`, { 
+
+                        method: 'GET', 
+
+                        headers: { 'Accept': 'application/json' } 
+
+                    }); 
+
+                     
+
+                    if (response.ok) { 
+
+                        const data = await response.json(); 
+
+                        if (data.messages && data.messages.length > 0) { 
+
+                            data.messages.forEach((msg) => { 
+
+                                if (msg.type === 'user') { 
+
+                                    this.addMessage(msg.content, 'user', false); 
+
+                                } else if (msg.type === 'assistant') { 
+
+                                    if (msg.visualization) { 
+
+                                        this.addMessage({ 
+
+                                            text: msg.content, 
+
+                                            graph: { 
+
+                                                type: msg.visualization.type || 'bar', 
+
+                                                data: msg.visualization.data, 
+
+                                                options: this.getChartOptions(msg.visualization) 
+
+                                            } 
+
+                                        }, 'assistant', false); 
+
+                                    } else { 
+
+                                        this.addMessage(msg.content, 'assistant', false); 
+
+                                    } 
+
+                                } 
+
+                            }); 
+
+                            const conversationCount = Math.floor(data.messages.length / 2); 
+
+                            this.addMessage(`📋 Restored ${conversationCount} previous conversations`, 'system', false); 
+
+                        } else { 
+
+                            this.addMessage('Start asking questions about your data!', 'system', false); 
+
+                        } 
+
+                    } 
+
+                } catch (error) { 
+
+                    console.error('Error loading chat history:', error); 
+
+                    this.addMessage('Start asking questions about your data!', 'system', false); 
+
+                } 
+
+            } 
+
+ 
+
+            async sendMessage() { 
+
+                const message = this.elements.messageInput.value.trim(); 
+
+                if (!message) return; 
+
+ 
+
+                if (!this.state.isConnected) { 
+
+                    this.addMessage('❌ Please wait for server connection', 'system'); 
+
+                    return; 
+
+                } 
+
+ 
+
+                this.addMessage(message, 'user'); 
+
+                this.elements.messageInput.value = ''; 
+
+                this.autoResizeTextarea(); 
+
+                this.showTypingIndicator(); 
+
+ 
+
+                try { 
+
+                    const response = await fetch(`${this.state.serverUrl}${this.state.endpoints.analyze}?session=${encodeURIComponent(this.state.sessionId)}`, { 
+
+                        method: 'POST', 
+
+                        headers: { 
+
+                            'Content-Type': 'application/json', 
+
+                            'Accept': 'application/json' 
+
+                        }, 
+
+                        body: JSON.stringify({ 
+
+                            question: message 
+
+                        }) 
+
+                    }); 
+
+                     
+
+                    if (response.ok) { 
+
+                        const data = await response.json(); 
+
+                        this.hideTypingIndicator(); 
+
+ 
+
+                        if (data.visualization) { 
+
+                            this.addMessage({ 
+
+                                text: data.analysis, 
+
+                                graph: { 
+
+                                    type: data.visualization.type || 'bar', 
+
+                                    data: data.visualization.data, 
+
+                                    options: this.getChartOptions(data.visualization) 
+
+                                } 
+
+                            }, 'assistant'); 
+
+                        } else { 
+
+                            this.addMessage(data.analysis || 'No response received', 'assistant'); 
+
+                        } 
+
+ 
+
+                        // Refresh session list to update message counts 
+
+                        await this.loadAvailableSessions(); 
+
+                    } else { 
+
+                        const errorData = await response.json().catch(() => ({ detail: 'Unknown error' })); 
+
+                        throw new Error(errorData.detail || `HTTP ${response.status}`); 
+
+                    } 
+
+                } catch (error) { 
+
+                    this.hideTypingIndicator(); 
+
+                    this.addMessage(`❌ Query failed: ${error.message}`, 'system'); 
+
+                } 
+
+            } 
+
+ 
+
+            addMessage(content, type, saveToMemory = true) { 
+
+                const messageEl = document.createElement('div'); 
+
+                messageEl.className = `message ${type}`; 
+
+ 
+
+                if (type === 'assistant' && typeof content === 'object' && content.graph) { 
+
+                    const graphContainer = document.createElement('div'); 
+
+                    graphContainer.className = 'graph-container'; 
+
+                    const canvas = document.createElement('canvas'); 
+
+                    graphContainer.appendChild(canvas); 
+
+                    messageEl.appendChild(graphContainer); 
+
+ 
+
+                    if (content.text) { 
+
+                        const textDiv = document.createElement('div'); 
+
+                        textDiv.innerHTML = this.processMarkdownBold(content.text); 
+
+                        messageEl.appendChild(textDiv); 
+
+                    } 
+
+ 
+
+                    new Chart(canvas, content.graph); 
+
+                } else { 
+
+                    messageEl.innerHTML = this.processMarkdownBold(content); 
+
+                } 
+
+ 
+
+                this.elements.messages.appendChild(messageEl); 
+
+                this.scrollToBottom(); 
+
+            } 
+
+ 
+
+            getChartOptions(visualization) { 
+
+                return { 
+
+                    responsive: true, 
+
+                    maintainAspectRatio: false, 
+
+                    plugins: { 
+
+                        title: { 
+
+                            display: true, 
+
+                            text: visualization.data?.datasets?.[0]?.label || 'Data Visualization' 
+
+                        }, 
+
+                        legend: { 
+
+                            display: true, 
+
+                            position: 'top' 
+
+                        }, 
+
+                        tooltip: { 
+
+                            enabled: true, 
+
+                            mode: 'index', 
+
+                            intersect: false 
+
+                        } 
+
+                    }, 
+
+                    scales: visualization.type !== 'pie' && visualization.type !== 'doughnut' ? { 
+
+                        y: { 
+
+                            beginAtZero: true 
+
+                        } 
+
+                    } : {} 
+
+                }; 
+
+            } 
+
+ 
+
+            showTypingIndicator() { 
+
+                this.elements.typingIndicator.style.display = 'block'; 
+
+                this.elements.messageInput.disabled = true; 
+
+                this.elements.sendBtn.disabled = true; 
+
+                this.scrollToBottom(); 
+
+            } 
+
+ 
+
+            hideTypingIndicator() { 
+
+                this.elements.typingIndicator.style.display = 'none'; 
+
+                this.elements.messageInput.disabled = false; 
+
+                this.elements.sendBtn.disabled = false; 
+
+                this.elements.messageInput.focus(); 
+
+            } 
+
+ 
+
+            updateConnectionStatus(status) { 
+
+                const indicator = this.elements.statusIndicator; 
+
+                const text = this.elements.statusText; 
+
+                const badge = this.elements.connectionBadge; 
+
+ 
+
+                switch(status) { 
+
+                    case 'connecting': 
+
+                        indicator.className = 'status-indicator connecting'; 
+
+                        text.textContent = 'CONNECTING'; 
+
+                        badge.className = 'status-badge connecting'; 
+
+                        break; 
+
+                    case 'connected': 
+
+                        indicator.className = 'status-indicator online'; 
+
+                        text.textContent = 'ONLINE'; 
+
+                        badge.className = 'status-badge connected'; 
+
+                        break; 
+
+                    case 'offline': 
+
+                        indicator.className = 'status-indicator offline'; 
+
+                        text.textContent = 'OFFLINE'; 
+
+                        badge.className = 'status-badge offline'; 
+
+                        break; 
+
+                } 
+
+            } 
+
+ 
+
+            scrollToBottom() { 
+
+                setTimeout(() => { 
+
+                    this.elements.messages.scrollTop = this.elements.messages.scrollHeight; 
+
+                }, 100); 
+
+            } 
+
+ 
+
+            processMarkdownBold(text) { 
+
+                let processedText = text; 
+
+                processedText = processedText.replace(/^###\s*(.*?)$/gm, '<h3>$1</h3>'); 
+
+                processedText = processedText.replace(/##(.*?)##/g, '<strong>$1</strong>'); 
+
+                processedText = processedText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>'); 
+
+                return processedText; 
+
+            } 
+
+        } 
+
+ 
+
+        // Initialize when page loads 
+
+        document.addEventListener('DOMContentLoaded', () => { 
+
+            window.chatbot = new DataChatbot(); 
+
+        }); 
+
+    </script> 
+
+</body> 
+
+</html> 
+
+ 
+
  
-                this.setupEventListeners();
- 
-                this.testConnection();
- 
-            }
- 
-           
- 
-            setupEventListeners() {
- 
-                this.elements.clearBtn.onclick = () => this.clearChat();
-                this.elements.sendBtn.onclick = () => this.sendMessage();
-               
- 
-                this.elements.messageInput.onkeypress = (e) => {
- 
-                    if (e.key === 'Enter' && !e.shiftKey) {
- 
-                        e.preventDefault();
- 
-                        this.sendMessage();
- 
-                    }
- 
-                };
- 
-               
- 
-                this.elements.messageInput.oninput = () => this.autoResizeTextarea();
- 
-            }
- 
-           
- 
-            autoResizeTextarea() {
- 
-                const input = this.elements.messageInput;
- 
-                input.style.height = 'auto';
- 
-                input.style.height = Math.min(input.scrollHeight, 120) + 'px';
- 
-            }
- 
-           
- 
-            async testConnection() {
- 
-                this.updateConnectionStatus('connecting');
- 
-               
- 
-                try {
- 
-                    const response = await fetch(`${this.state.serverUrl}${this.state.endpoints.health}`, {
- 
-                        method: 'GET',
- 
-                        headers: { 'Accept': 'application/json' }
- 
-                    });
- 
-                   
- 
-                    if (response.ok) {
- 
-                        this.state.isConnected = true;
- 
-                        this.updateConnectionStatus('connected');
- 
-                        this.addMessage('✅ Successfully connected to server!', 'system');
- 
-                        this.addMessage('Start asking questions about your data.', 'system');
- 
-                    } else {
- 
-                        throw new Error(`Server responded with ${response.status}`);
- 
-                    }
- 
-                   
- 
-                } catch (error) {
- 
-                    this.state.isConnected = false;
- 
-                    this.updateConnectionStatus('offline');
- 
-                    this.addMessage(`❌ Connection failed: ${error.message}`, 'system');
- 
-                   
- 
-                    if (error.message.includes('Failed to fetch')) {
- 
-                        this.addMessage('💡 Make sure your server is running with CORS enabled', 'system');
- 
-                    }
- 
-                }
- 
-            }
- 
-           
- 
-            async sendMessage() {
- 
-                const message = this.elements.messageInput.value.trim();
- 
-                if (!message) return;
- 
-               
- 
-                if (!this.state.isConnected) {
- 
-                    this.addMessage('❌ Please wait for server connection', 'system');
- 
-                    return;
- 
-                }
- 
-               
- 
-                this.addMessage(message, 'user');
- 
-                this.elements.messageInput.value = '';
- 
-                this.autoResizeTextarea();
- 
-               
- 
-                this.showTypingIndicator();
- 
-               
- 
-                try {
- 
-                    const rowLimit = 100;
-                   
- 
-                    const response = await fetch(`${this.state.serverUrl}${this.state.endpoints.analyze}`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            question: message,
-                            limit: rowLimit
-                        })
-                    });
-                   
-                    if (response.ok) {
-                        const data = await response.json();
-                        this.hideTypingIndicator();
-                       
-                        // Handle response that might contain graph data
-                        if (data.visualization) {
-                            this.addMessage({
-                                text: data.analysis,
-                                graph: {
-                                    type: data.visualization.type || 'bar',
-                                    data: data.visualization.data,
-                                    options: {
-                                        responsive: true,
-                                        maintainAspectRatio: false,
-                                        plugins: {
-                                            title: {
-                                                display: true,
-                                                text: data.visualization.data.datasets[0].label || 'Data Visualization'
-                                            },
-                                            legend: {
-                                                display: true,
-                                                position: 'top'
-                                            },
-                                            tooltip: {
-                                                enabled: true,
-                                                mode: 'index',
-                                                intersect: false
-                                            }
-                                        },
-                                        scales: {
-                                            y: {
-                                                beginAtZero: true
-                                            }
-                                        }
-                                    }
-                                }
-                            }, 'assistant');
-                        } else {
-                            this.addMessage(data.analysis || 'No response received', 'assistant');
-                        }
-                    } else {
-                        throw new Error(`HTTP ${response.status}`);
-                    }
-                   
-                } catch (error) {
-                    this.hideTypingIndicator();
-                    this.addMessage(`❌ Query failed: ${error.message}`, 'system');
-                }
-            }
- 
-           
- 
-            addMessage(content, type) {
- 
-                const messageEl = document.createElement('div');
- 
-                messageEl.className = `message ${type}`;
-               
-                if (type === 'assistant' && typeof content === 'object' && content.graph) {
-                    // Handle graph data
-                    const graphContainer = document.createElement('div');
-                    graphContainer.className = 'graph-container';
-                    const canvas = document.createElement('canvas');
-                    graphContainer.appendChild(canvas);
-                    messageEl.appendChild(graphContainer);
-                   
-                    // Add text content if present
-                    if (content.text) {
-                        const textDiv = document.createElement('div');
-                        textDiv.innerHTML = this.processMarkdownBold(content.text);
-                        messageEl.appendChild(textDiv);
-                    }
-                   
-                    // Create the chart
-                    new Chart(canvas, content.graph);
-                } else {
-                    messageEl.innerHTML = this.processMarkdownBold(content);
-                }
-               
-                this.elements.messages.appendChild(messageEl);
-                this.scrollToBottom();
- 
-            }
- 
-           
- 
-            showTypingIndicator() {
- 
-                this.elements.typingIndicator.style.display = 'block';
- 
-                this.elements.messageInput.disabled = true;
- 
-                this.elements.sendBtn.disabled = true;
- 
-                this.scrollToBottom();
- 
-            }
- 
-           
- 
-            hideTypingIndicator() {
- 
-                this.elements.typingIndicator.style.display = 'none';
- 
-                this.elements.messageInput.disabled = false;
- 
-                this.elements.sendBtn.disabled = false;
- 
-                this.elements.messageInput.focus();
- 
-            }
- 
-           
- 
-            updateConnectionStatus(status) {
- 
-                const indicator = this.elements.statusIndicator;
- 
-                const text = this.elements.statusText;
- 
-                const badge = this.elements.connectionBadge;
- 
-               
- 
-                switch(status) {
- 
-                    case 'connecting':
- 
-                        indicator.style.background = '#006400'; /* Dark green color */
- 
-                        text.textContent = 'CONNECTING';
- 
-                        badge.className = 'status-badge connecting';
- 
-                        break;
- 
-                    case 'connected':
- 
-                        indicator.className = 'status-indicator online';
- 
-                        text.textContent = 'ONLINE';
- 
-                        badge.className = 'status-badge connected';
- 
-                        break;
- 
-                    case 'offline':
- 
-                        indicator.className = 'status-indicator';
- 
-                        text.textContent = 'OFFLINE';
- 
-                        badge.className = 'status-badge offline';
- 
-                        break;
- 
-                }
- 
-            }
- 
-           
- 
-            clearChat() {
- 
-                this.elements.messages.innerHTML = '<div class="message system">Chat cleared. Ready for new questions!</div>';
- 
-            }
- 
-           
- 
-            scrollToBottom() {
- 
-                setTimeout(() => {
- 
-                    this.elements.messages.scrollTop = this.elements.messages.scrollHeight;
- 
-                }, 100);
- 
-            }
- 
-            // New method to process markdown-like bold syntax
-            processMarkdownBold(text) {
-                let processedText = text;
-                // Process headings first (lines starting with ###)
-                processedText = processedText.replace(/^###\s*(.*?)$/gm, '<h3>$1</h3>');
-                // Replace ##text## with <strong>text</strong>
-                processedText = processedText.replace(/##(.*?)##/g, '<strong>$1</strong>');
-                // Replace **text** with <strong>text</strong>
-                processedText = processedText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-                return processedText;
-            }
- 
-        }
- 
-       
- 
-        // Initialize when page loads
- 
-        document.addEventListener('DOMContentLoaded', () => {
- 
-            window.chatbot = new DataChatbot();
- 
-        });
- 
-    </script>
- 
-</body>
- 
-</html>
