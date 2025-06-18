@@ -15,11 +15,12 @@
         body {
             font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
             background: #f2f2f4;
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
+            overflow-x: hidden; /* Prevent body scroll */
         }
 
-        /* Sidebar styles */
+        /* Sidebar styles - Fixed height and position */
         .sidebar {
             width: 280px;
             background: #000000;
@@ -28,8 +29,11 @@
             display: flex;
             flex-direction: column;
             transition: width 0.3s ease;
-            overflow-y: auto;
-            overflow-x: hidden;
+            height: 100vh; /* Full viewport height */
+            position: fixed; /* Fixed position */
+            left: 0;
+            top: 0;
+            z-index: 1000;
         }
 
         .sidebar.minimized {
@@ -47,6 +51,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-shrink: 0; /* Don't shrink */
         }
 
         .sidebar-header h2 {
@@ -68,14 +73,16 @@
             display: flex;
             flex-direction: column;
             gap: 12px;
-            min-height: 0;
+            min-height: 0; /* Allow shrinking */
+            overflow: hidden; /* Prevent overflow */
         }
 
         .session-list {
             list-style: none;
             margin-top: 10px;
             flex-grow: 1;
-            overflow-y: auto;
+            overflow-y: auto; /* Scrollable sessions list */
+            min-height: 0; /* Allow shrinking */
         }
 
         .session-list li {
@@ -85,6 +92,7 @@
             cursor: pointer;
             border-radius: 6px;
             margin-bottom: 4px;
+            flex-shrink: 0; /* Don't shrink individual items */
         }
 
         .session-list li:hover {
@@ -96,12 +104,20 @@
             font-weight: 600;
         }
 
-        /* Main content wrapper */
+        /* Main content wrapper - adjusted for fixed sidebar */
         .main-wrapper {
             flex: 1;
             display: flex;
             flex-direction: column;
             position: relative;
+            margin-left: 280px; /* Space for sidebar */
+            transition: margin-left 0.3s ease;
+            min-height: 100vh;
+            
+        }
+
+        .main-wrapper.minimized-sidebar {
+            margin-left: 50px; /* Space for minimized sidebar */
         }
 
         .header {
@@ -112,6 +128,7 @@
             align-items: center;
             justify-content: space-between;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            flex-shrink: 0; /* Don't shrink */
         }
 
         .header-left {
@@ -230,28 +247,28 @@
             padding: 20px 24px;
             max-width: 1200px;
             margin: 0 auto;
-            width: 100%;
-        }
+            width: 100%;          
+            padding-bottom: 40px;        }
 
         .chat-content {
-            flex: 1;
+            
             background: white;
             border-radius: 12px;
             border: 1px solid #e5e7eb;
             display: flex;
             flex-direction: column;
-            min-height: 0;
+            min-height: calc(100vh - 160px);
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
         }
 
         .messages {
             flex: 1;
-            overflow-y: auto;
+           
             padding: 20px;
             display: flex;
             flex-direction: column;
             gap: 16px;
-            min-height: 0;
+            min-height: 400px; /* Allow shrinking */
         }
 
         .message {
@@ -304,6 +321,7 @@
             display: flex;
             gap: 12px;
             align-items: flex-end;
+            
         }
 
         .input-container {
@@ -387,6 +405,12 @@
             .sidebar.minimized {
                 width: 0;
             }
+            .main-wrapper {
+                margin-left: 200px;
+            }
+            .main-wrapper.minimized-sidebar {
+                margin-left: 0;
+            }
             .chat-container {
                 padding: 10px;
             }
@@ -419,7 +443,26 @@
         <div class="sidebar-content">
             <button class="session-btn new-chat" id="newChatBtn">New Chat</button>
             <ul class="session-list" id="sessionList">
-                <li>Loading sessions...</li>
+                <li>Chat Session 1</li>
+                <li>Chat Session 2</li>
+                <li>Chat Session 3</li>
+                <li>Chat Session 4</li>
+                <li>Chat Session 5</li>
+                <li>Chat Session 6</li>
+                <li>Chat Session 7</li>
+                <li>Chat Session 8</li>
+                <li>Chat Session 9</li>
+                <li>Chat Session 10</li>
+                <li>Chat Session 11</li>
+                <li>Chat Session 12</li>
+                <li>Chat Session 13</li>
+                <li>Chat Session 14</li>
+                <li>Chat Session 15</li>
+                <li>Chat Session 16</li>
+                <li>Chat Session 17</li>
+                <li>Chat Session 18</li>
+                <li>Chat Session 19</li>
+                <li>Chat Session 20</li>
             </ul>
         </div>
     </div>
@@ -451,7 +494,19 @@
 
         <div class="chat-container">
             <div class="chat-content">
-                <div class="messages" id="messages"></div>
+                <div class="messages" id="messages">
+                    <div class="message system">Welcome! Ask me anything about your data...</div>
+                    <div class="message user">What are the sales trends?</div>
+                    <div class="message assistant">Based on the data analysis, here are the key sales trends I've identified...</div>
+                    <div class="message user">Can you show me a breakdown by region?</div>
+                    <div class="message assistant">Certainly! Here's the regional breakdown of sales performance...</div>
+                    <div class="message user">What about monthly comparisons?</div>
+                    <div class="message assistant">Here's the monthly comparison data showing seasonal patterns...</div>
+                    <div class="message user">How do we compare to last year?</div>
+                    <div class="message assistant">Comparing to last year's performance, there are several notable changes...</div>
+                    <div class="message user">What recommendations do you have?</div>
+                    <div class="message assistant">Based on the analysis, I recommend focusing on these key areas...</div>
+                </div>
                 <div class="typing-indicator" id="typingIndicator">
                     <span class="thinking-text">Thinking...</span>
                 </div>
@@ -841,23 +896,13 @@
             updateSidebarState() {
                 if (this.state.isSidebarMinimized) {
                     this.elements.sidebar.classList.add('minimized');
-                    this.elements.mainWrapper.classList.add('minimized-sidebar-margin');
-                    this.elements.toggleCollapseIcon.classList.remove('icon-open-sidebar');
-                    this.elements.toggleCollapseIcon.classList.remove('icon-expand-sidebar');
-                    this.elements.toggleCollapseIcon.classList.add('icon-collapse-sidebar');
-                    
+                    this.elements.mainWrapper.classList.add('minimized-sidebar');
                     this.elements.sidebarHeaderH2.textContent = '';
-
                     this.elements.toggleSidebarBtn.style.display = 'none';
                 } else {
                     this.elements.sidebar.classList.remove('minimized');
-                    this.elements.mainWrapper.classList.remove('minimized-sidebar-margin');
-                    this.elements.toggleCollapseIcon.classList.remove('icon-open-sidebar');
-                    this.elements.toggleCollapseIcon.classList.remove('icon-expand-sidebar');
-                    this.elements.toggleCollapseIcon.classList.add('icon-collapse-sidebar');
-                    
+                    this.elements.mainWrapper.classList.remove('minimized-sidebar');
                     this.elements.sidebarHeaderH2.textContent = 'Chats';
-
                     this.elements.toggleSidebarBtn.style.display = 'none';
                 }
             }
@@ -870,12 +915,15 @@
             // Sidebar toggle functionality
             const sidebar = document.getElementById('sidebar');
             const toggleBtn = document.getElementById('toggleSidebar');
+            const mainWrapper = document.getElementById('mainWrapper');
 
             toggleBtn.addEventListener('click', () => {
                 sidebar.classList.toggle('minimized');
+                mainWrapper.classList.toggle('minimized-sidebar');
                 toggleBtn.textContent = sidebar.classList.contains('minimized') ? '≫' : '≪';
             });
         });
     </script>
 </body>
 </html>
+
